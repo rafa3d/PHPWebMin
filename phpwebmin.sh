@@ -3,6 +3,7 @@
 # Variables
 version="1.0"
 date="30/11/2024"
+github_link="https://github.com/rafa3d/PHPWebMin"
 
 # Header
 echo "
@@ -61,7 +62,11 @@ fi
 WEB_DIR="/var/www/phpwebmin"
 echo "Ensuring the web directory exists at $WEB_DIR..."
 sudo mkdir -p $WEB_DIR
-echo "<?php echo 'Hello World from PHPWebMin $version';" | sudo tee $WEB_DIR/index.php >/dev/null
+echo "<?php 
+echo 'Hello World from PHPWebMin $version!'; 
+echo '<br>Date: $date'; 
+echo '<br>GitHub: <a href=\"$github_link\" target=\"_blank\">$github_link</a>';
+?>" | sudo tee $WEB_DIR/index.php >/dev/null
 
 # Configure systemd service for PHP built-in web server
 SERVICE_FILE="/etc/systemd/system/phpwebmin.service"
