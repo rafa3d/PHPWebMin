@@ -62,7 +62,7 @@ echo "<?php echo 'Hello World from PHPWebMin 1.0';" | sudo tee $WEB_DIR/index.ph
 # Step 7: Configure systemd service for PHP built-in web server
 SERVICE_FILE="/etc/systemd/system/phpwebmin.service"
 echo "Configuring PHPWebMin service..."
-sudo bash -c "cat > $SERVICE_FILE" <<EOF
+sudo tee $SERVICE_FILE >/dev/null <<EOF
 [Unit]
 Description=PHPWebMin Web Server
 After=network.target
