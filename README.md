@@ -17,6 +17,9 @@
 
 ---
 
+![PHPWebMin Screenshot](phpwebmin.webp)
+
+
 ## **Quick Start**
 
 Run the following command to execute the script directly from GitHub:
@@ -24,5 +27,3 @@ Run the following command to execute the script directly from GitHub:
 ```bash
 curl -O https://raw.githubusercontent.com/rafa3d/PHPWebMin/main/phpwebmin.sh
 bash phpwebmin.sh
-
-![Screenshot](phpwebmin.webp)
