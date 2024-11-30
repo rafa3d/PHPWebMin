@@ -34,7 +34,7 @@ sudo apt update -qq >/dev/null
 echo "Removing unnecessary web services..."
 sudo apt remove -y nginx apache2 lighttpd httpd >/dev/null 2>&1 || true
 
-# Install PHP CLI and Nano if not already installed
+# Install PHP CLI and Nano
 echo "Installing PHP CLI and Nano..."
 if ! command -v php >/dev/null; then
     sudo apt install -y php-cli >/dev/null 2>&1
@@ -84,4 +84,15 @@ EOF
 # Reload systemd and start the service
 echo "Reloading and starting the PHPWebMin service..."
 sudo systemctl daemon-reload >/dev/null 2>&1
-sudo systemctl
+sudo systemctl enable phpwebmin >/dev/null 2>&1
+sudo systemctl restart phpwebmin >/dev/null 2>&1
+
+# Clean up unused packages
+echo "Cleaning up unused packages..."
+sudo apt autoremove -y >/dev/null 2>&1
+sudo apt clean >/dev/null 2>&1
+
+# Show the server URL
+PUBLIC_IP=$(curl -s ifconfig.me)
+echo "PHPWebMin $version setup completed!"
+echo "Your web server is running at http://$PUBLIC_IP:$PORT"
