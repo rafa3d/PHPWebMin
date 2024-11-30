@@ -22,4 +22,5 @@
 Run the following command to execute the script directly from GitHub:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/rafa3d/PHPWebMin/main/phpwebmin.sh | sudo bash
+curl -O https://raw.githubusercontent.com/rafa3d/PHPWebMin/main/phpwebmin.sh
+bash phpwebmin.sh
