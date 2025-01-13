@@ -60,7 +60,7 @@ fi
 
 # Create or update the web directory
 WEB_DIR="/var/www/phpwebmin"
-echo "Ensuring the web directory exists at $WEB_DIR..."
+echo "Ensuring the web directory exists at $WEB_DIR"
 sudo mkdir -p $WEB_DIR
 echo "<?php 
 echo 'Hello World from PHPWebMin $version!'; 
@@ -98,6 +98,6 @@ sudo apt autoremove -y >/dev/null 2>&1
 sudo apt clean >/dev/null 2>&1
 
 # Show the server URL
-PUBLIC_IP=$(curl -s ifconfig.me)
+PUBLIC_IP=$(curl -4 -s ifconfig.me)
 echo "PHPWebMin $version setup completed!"
 echo "Your web server is running at http://$PUBLIC_IP:$PORT"
