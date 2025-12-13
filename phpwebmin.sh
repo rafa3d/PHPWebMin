@@ -1,8 +1,8 @@
 #!/bin/sh
 
 # Variables
-version="1.0"
-date="30/11/2024"
+version="1.1"
+date="13/12/2025"
 github_link="https://github.com/rafa3d/PHPWebMin"
 WEB_DIR="/var/www/phpwebmin"
 
@@ -28,7 +28,6 @@ detect_os() {
     return
   fi
   if [ -f /etc/os-release ]; then
-    # shellcheck disable=SC1091
     . /etc/os-release
     case "$ID" in
       alpine) echo "alpine" ;;
@@ -38,6 +37,30 @@ detect_os() {
   else
     echo "unknown"
   fi
+}
+
+php_has_curl() {
+  command -v php >/dev/null 2>&1 || return 1
+  php -m 2>/dev/null | grep -qi '^curl$'
+}
+
+install_php_curl_debian() {
+  if php_has_curl; then
+    echo "PHP curl module already enabled."
+    return 0
+  fi
+  echo "Installing php-curl (apt)..."
+  run "apt install -y php-curl >/dev/null 2>&1 || true"
+}
+
+install_php_curl_alpine() {
+  if php_has_curl; then
+    echo "PHP curl module already enabled."
+    return 0
+  fi
+  echo "Installing php-curl (apk)..."
+  # Alpine 3.22 normalmente: php83-curl
+  run "apk add --no-cache php83-curl >/dev/null 2>&1 || apk add --no-cache php-curl >/dev/null 2>&1 || true"
 }
 
 # Header
@@ -84,6 +107,9 @@ if [ "$OS" = "debian" ]; then
   command -v php >/dev/null 2>&1 || run "apt install -y php-cli >/dev/null 2>&1"
   command -v nano >/dev/null 2>&1 || run "apt install -y nano >/dev/null 2>&1"
 
+  # NEW: php-curl
+  install_php_curl_debian
+
 elif [ "$OS" = "alpine" ]; then
   echo "Updating package lists (apk)..."
   run "apk update >/dev/null"
@@ -92,7 +118,6 @@ elif [ "$OS" = "alpine" ]; then
   run "apk del --quiet nginx apache2 lighttpd httpd 2>/dev/null || true"
 
   echo "Installing PHP CLI and Nano (apk)..."
-  # En Alpine moderno suele ser PHP 8.3 (php83 / php83-cli)
   if ! command -v php >/dev/null 2>&1; then
     run "apk add --no-cache php83 php83-cli >/dev/null 2>&1 || apk add --no-cache php php-cli >/dev/null 2>&1"
   fi
@@ -100,6 +125,10 @@ elif [ "$OS" = "alpine" ]; then
 
   # OpenRC (si no existe, lo instalamos)
   command -v rc-service >/dev/null 2>&1 || run "apk add --no-cache openrc >/dev/null 2>&1"
+
+  # NEW: php-curl
+  install_php_curl_alpine
+
 else
   echo "ERROR: no reconozco el sistema. (Necesito Debian/Ubuntu o Alpine)"
   exit 1
@@ -135,6 +164,9 @@ run "cat > '$WEB_DIR/index.php' <<'PHP'
 echo 'Hello World from PHPWebMin ' . \$version . '!';
 echo '<br>Date: ' . \$date;
 echo '<br>GitHub: <a href=\"' . \$github_link . '\" target=\"_blank\">' . \$github_link . '</a>';
+
+echo '<br><br>curl_init exists? ';
+echo function_exists('curl_init') ? 'YES' : 'NO';
 PHP
 "
 
@@ -184,11 +216,8 @@ EOF
 "
   run "chmod +x '$INIT_FILE'"
 
-  # OpenRC en sistemas “reales”: añadir y arrancar
-  # (en contenedores puede que no haya runlevels completos; no falla si no puede)
   run "rc-update add phpwebmin default >/dev/null 2>&1 || true"
   run "rc-service phpwebmin restart >/dev/null 2>&1 || rc-service phpwebmin start >/dev/null 2>&1 || true"
-
 else
   echo "No systemd/OpenRC detectado. Arranco en foreground para que lo gestiones tú:"
   echo "  /usr/bin/php -S 0.0.0.0:$PORT -t $WEB_DIR"
@@ -200,7 +229,6 @@ if [ "$OS" = "debian" ]; then
   run "apt autoremove -y >/dev/null 2>&1"
   run "apt clean >/dev/null 2>&1"
 elif [ "$OS" = "alpine" ]; then
-  # apk ya es “lean”, pero limpiamos cache si existiera
   run "rm -rf /var/cache/apk/* >/dev/null 2>&1 || true"
 fi
 
